@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Świadome Macierzyństwo 30+</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&family=Caveat:wght@500&display=swap');
+
+:root {
+    --color-bg: #FCF8F9;
+    --color-rose: #FDF2F8;
+    --color-lilac: #F5F3FF;
+    --color-text-dark: #3D353F;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text-dark);
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    font-style: normal !important;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 350px;
+}
+
+.smooth-transition {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-shadow {
+    box-shadow: 0 4px 15px -5px rgba(183, 153, 191, 0.08);
+}
+
+/* Styl ramki dla obrazków */
+.img-frame {
+    border: 8px solid white;
+    border-radius: 2rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    background: white;
+    transition: transform 0.4s ease;
+}
+
+.content-card {
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    border-radius: 2.5rem;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #F3E8EF;
+}
+
+.content-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px -15px rgba(219, 139, 184, 0.12);
+}
+
+.content-card:hover .img-frame {
+    transform: scale(1.02);
+}
+
+/* Notebook Page Style */
+.notebook-page {
+    background-color: #fffef0;
+    background-image: linear-gradient(#e1e9f6 1px, transparent 1px);
+    background-size: 100% 2.5rem;
+    position: relative;
+    padding: 3rem 2rem 2rem 4rem;
+    border-radius: 4px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #e2e2d0;
+    transform: rotate(-0.5deg);
+}
+
+.notebook-page::before {
+    content: '';
+    position: absolute;
+    left: 3rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #ffb6c1;
+}
+
+.notebook-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
+    line-height: 2.5rem;
+    color: #4b4b4b;
+}
+
+.tip-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%);
+    border-radius: 2rem;
+    padding: 2rem;
+    border: 1px solid #fce7f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.calc-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid #F3E8EF;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.calc-input:focus {
+    border-color: #A78BFA;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-view {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.quiz-option {
+    border: 2px solid #F3E8EF;
+    transition: all 0.2s ease;
+    border-radius: 1.5rem;
+}
+.quiz-option:hover {
+    border-color: #DDD6FE;
+    background-color: #F5F3FF;
+}
+.quiz-option.correct {
+    border-color: #10B981;
+    background-color: #ECFDF5;
+}
+.quiz-option.incorrect {
+    border-color: #EF4444;
+    background-color: #FEF2F2;
+}
+
+#chat-messages::-webkit-scrollbar { width: 3px; }
+#chat-messages::-webkit-scrollbar-thumb { background: #EEDEEF; border-radius: 10px; }
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #A78BFA;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing 1.4s infinite ease-in-out both;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+</style>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                rose: { 50: '#FDF2F8', 100: '#FCE7F3', 200: '#FBCFE8' },
+                lilac: { 50: '#F5F3FF', 100: '#EDE9FE', 200: '#DDD6FE', 400: '#A78BFA', 600: '#8B5CF6' }
+            }
+        }
+    }
+}
+
+function handleImageError(img, text) {
+    const parent = img.parentElement;
+    img.style.display = 'none';
+    const placeholder = document.createElement('div');
+    placeholder.className = 'w-full h-full bg-gradient-to-br from-rose-50 to-lilac-50 flex items-center justify-center text-lilac-400 font-semibold p-4 text-center rounded-2xl';
+    placeholder.innerHTML = `<div>[Zdjęcie: ${text}]<br><span class='text-xs font-normal opacity-70'>Użyj pliku ${img.getAttribute('src')}</span></div>`;
+    parent.appendChild(placeholder);
+}
+</script>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-rose-100/50 nav-shadow">
+    <div class="max-w-7xl mx-auto py-6">
+        <!-- Belka 1: Tytuł (Interaktywny) -->
+        <div class="flex justify-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight cursor-pointer hover:text-lilac-400 smooth-transition" onclick="app.navigate('overview')">
+                Świadome Macierzyństwo 30+
+            </h1>
+        </div>
+        
+        <!-- Belka 2: Nawigacja -->
+        <nav class="flex justify-center items-center space-x-1 md:space-x-3 lg:space-x-6 px-2 overflow-x-auto pb-2 md:pb-0 text-center">
+            <button data-target="overview" class="nav-btn bg-lilac-100 text-lilac-800 font-semibold px-5 py-2 rounded-full text-xs md:text-sm smooth-transition border border-lilac-200 shadow-sm">Wprowadzenie</button>
+            <button data-target="preconception" class="nav-btn text-slate-600 hover:bg-rose-50 px-5 py-2 rounded-full text-xs md:text-sm font-medium smooth-transition border border-transparent">Prekoncepcja</button>
+            <button data-target="pregnancy" class="nav-btn text-slate-600 hover:bg-rose-50 px-5 py-2 rounded-full text-xs md:text-sm font-medium smooth-transition border border-transparent">Przebieg Ciąży</button>
+            <button data-target="psychology" class="nav-btn text-slate-600 hover:bg-rose-50 px-5 py-2 rounded-full text-xs md:text-sm font-medium smooth-transition border border-transparent">Psychologia</button>
+            <button data-target="calculators" class="nav-btn text-slate-600 hover:bg-rose-50 px-5 py-2 rounded-full text-xs md:text-sm font-medium smooth-transition border border-transparent">Kalkulatory</button>
+            <button data-target="quiz" class="nav-btn text-lilac-600 font-bold px-5 py-2 rounded-full text-xs md:text-sm smooth-transition border-b-2 border-lilac-600 hover:bg-lilac-50 underline decoration-lilac-600 decoration-2 underline-offset-4">Quiz</button>
+        </nav>
+    </div>
+</header>
+
+<main class="flex-grow max-w-6xl mx-auto px-4 py-16 w-full relative">
+
+    <section id="view-overview" class="view-section block animate-view">
+        <div class="text-center max-w-2xl mx-auto mb-20">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-800 mb-8 leading-tight">Edukacja i <span class="text-lilac-400">nowoczesne macierzyństwo</span></h2>
+            <p class="text-lg text-slate-500 font-light leading-relaxed">
+                Łączymy wiedzę medyczną z troską o Twój dobrostan emocjonalny. Przygotowaliśmy rzetelny portal, który poprowadzi Cię przez ten wyjątkowy czas świadomie i bezpiecznie.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="content-card smooth-transition cursor-pointer" onclick="app.navigate('preconception')">
+                <div class="p-6"><div class="img-frame bg-rose-50/20 aspect-square flex items-center justify-center overflow-hidden"><img src="Diagnostyka.png" alt="Diagnostyka" class="w-full h-full object-contain p-2" onerror="handleImageError(this, 'Diagnostyka')"></div></div>
+                <div class="p-6 text-center -mt-4"><h3 class="text-lg font-bold text-slate-800 mb-1">Diagnostyka</h3><p class="text-xs text-slate-500 font-bold tracking-[0.2em] uppercase">Przygotowanie 30+</p></div>
+            </div>
+            <div class="content-card smooth-transition cursor-pointer" onclick="app.navigate('pregnancy')">
+                <div class="p-6"><div class="img-frame bg-lilac-50/20 aspect-square flex items-center justify-center overflow-hidden"><img src="Monitorowanie.png" alt="Monitorowanie" class="w-full h-full object-contain p-2" onerror="handleImageError(this, 'Monitorowanie')"></div></div>
+                <div class="p-6 text-center -mt-4"><h3 class="text-lg font-bold text-slate-800 mb-1">Monitorowanie</h3><p class="text-xs text-slate-500 font-bold tracking-[0.2em] uppercase">Badania prenatalne</p></div>
+            </div>
+            <div class="content-card smooth-transition cursor-pointer" onclick="app.navigate('psychology')">
+                <div class="p-6"><div class="img-frame bg-rose-50/20 aspect-square flex items-center justify-center overflow-hidden"><img src="Równowaga.png" alt="Równowaga" class="w-full h-full object-contain p-2" onerror="handleImageError(this, 'Równowaga')"></div></div>
+                <div class="p-6 text-center -mt-4"><h3 class="text-lg font-bold text-slate-800 mb-1">Równowaga</h3><p class="text-xs text-slate-500 font-bold tracking-[0.2em] uppercase">Dobrostan psychiczny</p></div>
+            </div>
+            <div class="content-card smooth-transition cursor-pointer" onclick="app.navigate('calculators')">
+                <div class="p-6">
+                    <div class="img-frame bg-lilac-50/20 aspect-square flex items-center justify-center overflow-hidden">
+                        <img src="Kalkulatory.png" alt="Kalkulatory" class="w-full h-full object-contain p-2" onerror="handleImageError(this, 'Kalkulatory')">
+                    </div>
+                </div>
+                <div class="p-6 text-center -mt-4"><h3 class="text-lg font-bold text-slate-800 mb-1">Kalkulatory</h3><p class="text-xs text-slate-500 font-bold tracking-[0.2em] uppercase">Narzędzia interaktywne</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Widok: Prekoncepcja -->
+    <section id="view-preconception" class="view-section hidden animate-view space-y-16">
+        <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[3rem] border border-rose-100 shadow-sm">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 underline decoration-rose-200 underline-offset-8">Świadome przygotowanie do macierzyństwa</h2>
+            <div class="space-y-6 text-slate-600 leading-relaxed text-sm md:text-base font-light">
+                <p>
+                    Planowanie ciąży po 30. roku życia to wyjątkowy proces, który znajduje życiową dojrzałość z potrzebą nowoczesnej profilaktyki medycznej. Eksperci zalecają, aby etap tzw. <strong>prekoncepcji</strong> rozpocząć minimum 3 do 6 miesięcy przed planowanym poczęciem. Jest to czas na „bilans zdrowia prokreacyjnego”, który pozwala stworzyć optymalne środowisko dla rozwoju dziecka.
+                </p>
+                <p>
+                    Kluczem do spokoju jest rzetelna diagnostyka. Oznaczenie poziomu hormonu <strong>AMH</strong> pozwala na ocenę rezerwy jajnikowej, co pomaga w realistycznym zaplanowaniu czasu starań. Równie ważna jest optymalizacja pracy tarczycy (TSH) oraz wykluczenie niedoborów, takich jak niski poziom ferrytyny czy witaminy D3, które mają bezpośredni wpływ na płodność i przebieg wczesnej ciąży.
+                </p>
+                <p>
+                    Świadoma mama to kobieta, która dba nie tylko o wyniki badań, ale także o holistyczną równowagę. Zmiana nawyków żywieniowych na dietę bogatą w antyoksydanty i zdrowe tłuszcze wspiera jakość komórek jajowych, a suplementacja folanami i kwasami DHA buduje fundament pod rozwój układu nerwowego płodu. To etap budowania siły – zarówno tej fizycznej, jak i emocjonalnej.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div class="bg-white p-12 rounded-[4rem] border border-rose-100 shadow-sm text-center">
+                <h3 class="text-2xl font-bold text-slate-800 mb-10 text-center">Płodność a wiek</h3>
+                <div class="chart-container"><canvas id="fertilityChart"></canvas></div>
+                <p class="text-xs text-slate-500 mt-6 italic">Wartości wskazują na szansę poczęcia w ciągu 12 miesięcy starania.</p>
+            </div>
+            <div class="max-w-2xl mx-auto w-full">
+                <div class="notebook-page">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 font-serif underline decoration-red-200">Do zrobienia:</h3>
+                    <div class="notebook-text space-y-4">
+                        <div class="flex items-center space-x-4"><input type="checkbox" class="todo-item w-6 h-6 rounded border-gray-300" data-id="amh"><span>Badanie AMH i rezerwy jajnikowej</span></div>
+                        <div class="flex items-center space-x-4"><input type="checkbox" class="todo-item w-6 h-6 rounded border-gray-300" data-id="tsh"><span>Sprawdzić TSH (cel: 1.0 - 2.0)</span></div>
+                        <div class="flex items-center space-x-4"><input type="checkbox" class="todo-item w-6 h-6 rounded border-gray-300" data-id="suple"><span>Suplementacja: kwas foliowy i D3</span></div>
+                        <div class="flex items-center space-x-4"><input type="checkbox" class="todo-item w-6 h-6 rounded border-gray-300" data-id="dent"><span>Stomatolog - wyleczyć wszystkie ubytki</span></div>
+                        <div class="flex items-center space-x-4"><input type="checkbox" class="todo-item w-6 h-6 rounded border-gray-300" data-id="ginek"><span>Cytologia i USG ginekologiczne</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="bg-white p-12 rounded-[4rem] shadow-sm border border-lilac-100 mb-10">
+                <h3 class="text-2xl font-bold text-slate-800 mb-10 text-center">Talerz Płodności 30+</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="text-center p-6 bg-rose-50/40 rounded-[2.5rem] content-card"><div class="text-4xl mb-4">🥦</div><h4 class="font-bold text-slate-700 text-sm mb-2">Foniany Naturalne</h4><p class="text-xs text-slate-500">Zielone warzywa budujące układ nerwowy płodu.</p></div>
+                    <div class="text-center p-6 bg-lilac-50/40 rounded-[2.5rem] content-card"><div class="text-4xl mb-4">🥑</div><h4 class="font-bold text-slate-700 text-sm mb-2">Zdrowe Tłuszcze</h4><p class="text-xs text-slate-500">Paliwo dla jakości dojrzałych komórek jajowych.</p></div>
+                    <div class="text-center p-6 bg-rose-50/40 rounded-[2.5rem] content-card"><div class="text-4xl mb-4">🍓</div><h4 class="font-bold text-slate-700 text-sm mb-2">Antyoksydanty</h4><p class="text-xs text-slate-500">Ochrona komórek przed stresem oksydacyjnym.</p></div>
+                    <div class="text-center p-6 bg-lilac-50/40 rounded-[2.5rem] content-card"><div class="text-4xl mb-4">🐟</div><h4 class="font-bold text-slate-700 text-sm mb-2">Omega-3</h4><p class="text-xs text-slate-500">Niezbędne dla prawidłowego rozwoju mózgu.</p></div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto bg-lilac-50/30 p-8 md:p-12 rounded-[3rem] border border-lilac-100">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 italic">Dieta jako fundament jakości komórek jajowych</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-slate-600 text-sm leading-relaxed font-light">
+                    <div class="space-y-4">
+                        <p>
+                            Po 30. roku życia wzrasta znaczenie ochrony komórek jajowych przed tzw. stresem oksydacyjnym. <strong>Antyoksydanty</strong> (witaminy C, E, beta-karoten) działają jak tarcza, neutralizując wolne rodniki, które mogą uszkadzać DNA oocytów. Włączając do diety owoce jagodowe, pomidory czy orzechy, realnie wpływasz na swój potencjał rozrodczy.
+                        </p>
+                        <p>
+                            Węglowodany złożone o niskim indeksie glikemicznym to kolejny filar. Pomagają one utrzymać stabilny poziom insuliny, co jest kluczowe dla regularnej owulacji. Insulinooporność jest jedną z najczęstszych przyczyn problemów z zajściem w ciążę.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <p>
+                            <strong>Zdrowe tłuszcze</strong>, zwłaszcza kwasy Omega-3 i tłuszcze jednonienasycone (oliwa, awokado), wspierają ukrwienie macicy i regulują gospodarkę hormonalną. Dieta wzorowana na modelu śródziemnomorskim jest obecnie uznawana za „złoty standard” wspierania płodności.
+                        </p>
+                        <div class="p-6 bg-white rounded-2xl border border-lilac-100 italic text-xs text-lilac-600">
+                            „Pamiętaj o nawodnieniu. Woda jest niezbędna do produkcji śluzu płodnego oraz transportu składników odżywczych do rozwijającego się pęcherzyka jajnikowego.”
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Widok: Przebieg Ciąży -->
+    <section id="view-pregnancy" class="view-section hidden animate-view space-y-16">
+        <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[3rem] border border-lilac-100 shadow-sm">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 underline decoration-lilac-200 underline-offset-8">Nowoczesne standardy opieki nad dojrzałą ciężarną</h2>
+            <div class="space-y-6 text-slate-600 leading-relaxed text-sm md:text-base font-light">
+                <p>
+                    Ciąża po 30. i 35. roku życia w nowoczesnej medycynie nie jest już traktowana jako zjawisko nadzwyczajne, ale jako proces wymagający <strong>uważnego monitorowania</strong>. Dzięki postępowi w diagnostyce prenatalnej, dzisiejsze mamy mają dostęp do narzędzi, które pozwalają na niemal całkowite wykluczenie niepokoju o zdrowie genetyczne dziecka już na wczesnym etapie pierwszego trymestru.
+                </p>
+                <p>
+                    Kluczym elementem opieki jest ścisła współpraca z lekarzem prowadzącym oraz regularne wykonywanie badań przesiewowych. Od czerwca 2024 roku w Polsce każda ciężarna, bez względu na wiek, ma prawo do <strong>bezpłatnych badań prenatalnych na NFZ</strong>. Obejmują one USG genetyczne oraz testy z krwi (PAPP-A), które pozwalają na oszacowanie ryzyka statystycznego z dużą precyzją.
+                </p>
+                <p>
+                    Pamiętaj, że badania to nie tylko „szukanie wad”. To przede wszystkim możliwość podglądania, jak Twoje dziecko się rozwija, jak bije jego serce i jak rośnie jego ciało. Świadoma mama to partnerka dla lekarza – kobieta, która rozumie cel każdego badania i potrafi interpretować wyniki w oparciu o fakty, a nie mity. Dojrzałe macierzyństwo to czas, w którym Twoja świadomość własnego organizmu staje się największym sprzymierzeńcem bezpieczeństwa Twojego i dziecka.
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center max-w-3xl mx-auto">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">Kalendarz Monitorowania</h2>
+            <p class="text-slate-500 text-sm">Trzy trymestry, trzy kluczowe etapy diagnostyczne.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="tip-card"><div class="text-lilac-400 text-xs font-bold mb-4 uppercase tracking-widest">I Trymestr</div><p class="text-xs text-slate-500 leading-relaxed">USG Genetyczne (11-14 tyg) + PAPP-A. <br>Złoty standard: cfDNA.</p></div>
+            <div class="tip-card"><div class="text-lilac-400 text-xs font-bold mb-4 uppercase tracking-widest">II Trymestr</div><p class="text-xs text-slate-500 leading-relaxed">USG Połówkowe (18-22 tyg) + OGTT (obciążenie glukozą).</p></div>
+            <div class="tip-card"><div class="text-lilac-400 text-xs font-bold mb-4 uppercase tracking-widest">III Trymestr</div><p class="text-xs text-slate-500 leading-relaxed">Wzrastanie płodu (28-32 tyg), GBS, planowanie drogi porodu.</p></div>
+        </div>
+
+        <div class="bg-white p-12 rounded-[4rem] border border-rose-50 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center text-center lg:text-left">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-slate-800">Testy cfDNA (NIFTY/Sanco)</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">Najdokładniejszy nieinwazyjny test genetyczny z krwi matki. Czułość dla Trisomii 21 przekracza 99%. Pozwala uniknąć stresu związanego z testami statystycznymi.</p>
+                    <div class="p-6 bg-lilac-50 rounded-[2rem] text-xs text-slate-600 italic">Program Badań Prenatalnych na NFZ jest obecnie powszechny dla wszystkich kobiet.</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="chart-container"><canvas id="deliveryChart"></canvas></div>
+                    <p class="text-xs text-slate-500 mt-6 text-center max-w-[280px] leading-relaxed italic">
+                        Statystyczne zestawienie metod rozwiązania ciąży u kobiet rodzących po raz pierwszy po 35. roku życia.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Widok: Psychologia -->
+    <section id="view-psychology" class="view-section hidden animate-view space-y-16">
+        <div class="text-center max-w-3xl mx-auto">
+            <h2 class="text-4xl font-bold text-slate-800 mb-6">Dobrostan i Rezyliencja</h2>
+            <p class="text-lg text-slate-500 font-light">Twoja dojrzałość to tarcza, która chroni spokój Twojego dziecka.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="content-card smooth-transition">
+                <div class="p-4">
+                    <div class="img-frame bg-lilac-50/20 aspect-square flex items-center justify-center overflow-hidden">
+                        <img src="Mindfulness.png" alt="Mindfulness" class="w-full h-full object-cover" onerror="handleImageError(this, 'Mindfulness')">
+                    </div>
+                </div>
+                <div class="p-6 text-center -mt-2">
+                    <h4 class="font-bold text-sm mb-2">Mindfulness</h4>
+                    <p class="text-xs text-slate-500">Regulacja emocji poprzez uważną obecność.</p>
+                </div>
+            </div>
+            
+            <div class="content-card smooth-transition">
+                <div class="p-4">
+                    <div class="img-frame bg-rose-50/20 aspect-square flex items-center justify-center overflow-hidden">
+                        <img src="OswajanieLeku.png" alt="Oswajanie lęku" class="w-full h-full object-cover" onerror="handleImageError(this, 'Oswajanie lęku')">
+                    </div>
+                </div>
+                <div class="p-6 text-center -mt-2">
+                    <h4 class="font-bold text-sm mb-2">Oswajanie lęku</h4>
+                    <p class="text-xs text-slate-500">Zamień domysły na fakty medyczne i rzetelną diagnostykę.</p>
+                </div>
+            </div>
+            
+            <div class="content-card smooth-transition">
+                <div class="p-4">
+                    <div class="img-frame bg-lilac-50/20 aspect-square flex items-center justify-center overflow-hidden">
+                        <img src="Relacje.png" alt="Relacje" class="w-full h-full object-cover" onerror="handleImageError(this, 'Relacje')">
+                    </div>
+                </div>
+                <div class="p-6 text-center -mt-2">
+                    <h4 class="font-bold text-sm mb-2">Relacje</h4>
+                    <p class="text-xs text-slate-500">Ustal asertywne granice z Twoim otoczeniem.</p>
+                </div>
+            </div>
+            
+            <div class="content-card smooth-transition">
+                <div class="p-4">
+                    <div class="img-frame bg-rose-50/20 aspect-square flex items-center justify-center overflow-hidden">
+                        <img src="Regeneracja.png" alt="Regeneracja" class="w-full h-full object-cover" onerror="handleImageError(this, 'Regeneracja')">
+                    </div>
+                </div>
+                <div class="p-6 text-center -mt-2">
+                    <h4 class="font-bold text-sm mb-2">Regeneracja</h4>
+                    <p class="text-xs text-slate-500">Twoje ciało wykonuje ogromną pracę. Odpocznij.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[3rem] border border-lilac-100 shadow-sm">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 underline decoration-lilac-200 underline-offset-8">Dojrzałość jako kapitał – psychologia świadomego wyboru</h2>
+            <div class="space-y-6 text-slate-600 leading-relaxed text-sm md:text-base font-light">
+                <p>
+                    Macierzyństwo po 30. roku życia to najczęściej etap, w którym decyzja o dziecku jest owocem <strong>głębokiej refleksji i gotowości</strong>. Ten psychologiczny „kapitał” jest nie do przecenienia – ugruntowana tożsamość, stabilność emocjonalna i bagaż życiowych doświadczeń pozwalają na budowanie bezpiecznej, świadomej więzi z dzieckiem, opartej na spokoju, a nie na lęku czy przypadku.
+                </p>
+                <p>
+                    Współczesna psychologia okołoporodowa podkreśla zjawisko <strong>rezyliencji</strong>, czyli umiejętności elastycznego radzenia sobie z kryzysami. Kobiety dojrzałe statystycznie lepiej radzą sobie ze stresem towarzyszącym nowej roli, ponieważ w swoim życiu zawodowym i osobistym wypracowały już mechanizmy asertywności oraz skutecznego rozwiązywania problemów. Potrafią one oddzielić fakty od mitów i świadomie selekcjonować informacje, co jest kluczowe w świecie przebodźcowanym medycznymi statystykami.
+                </p>
+                <p>
+                    Największym wyzwaniem na tym etapie bywa jednak zmiana dotychczasowego trybu życia i konieczność przedefiniowania priorytetów. Dojrzała mama często staje przed dylematem „utraty kontroli” nad poukładaną dotąd rzeczywistością. Zaakceptowanie faktu, że macierzyństwo jest procesem dynamicznym, a nie projektem do perfekcyjnego zrealizowania, jest pierwszym krokiem do prawdziwego dobrostanu. Twoja dojrzałość to nie tylko wiek – to mądrość, która pozwala Ci być wystarczająco dobrą mamą dla Twojego dziecka.
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[4rem] p-12 border border-rose-50 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <h3 class="text-3xl font-bold text-slate-800 mb-8 underline decoration-lilac-100">Balans: Kariera i Rodzina</h3>
+                    <div class="space-y-6 text-sm text-slate-500">
+                        <div class="flex gap-4"><span class="text-lilac-400 text-xl font-bold">01.</span><p><strong>Delegowanie zadań.</strong> Twoja ugruntowana pozycja zawodowa pozwala na prośbę o wsparcie bez poczucia winy.</p></div>
+                        <div class="flex gap-4"><span class="text-lilac-400 text-xl font-bold">02.</span><p><strong>Doświadczenie to kapitał.</strong> Kompetencje nie znikną podczas urlopu. Doświadczenie jest wartością trwałą.</p></div>
+                        <div class="flex gap-4"><span class="text-lilac-400 text-xl font-bold">03.</span><p><strong>Świadome priorytety.</strong> Wykorzystaj dojrzałość do asertywnego komunikowania swoich potrzeb.</p></div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 flex justify-center p-4">
+                    <div class="img-frame max-w-sm overflow-hidden bg-rose-50">
+                        <img src="Spokój.png" alt="Spokój" class="w-full h-auto" onerror="handleImageError(this, 'Spokój')">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Widok: Kalkulatory -->
+    <section id="view-calculators" class="view-section hidden animate-view space-y-12">
+        <div class="text-center max-w-2xl mx-auto">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Kalkulatory Świadomej Mamy</h2>
+            <p class="text-slate-500 font-light leading-relaxed">Interaktywne narzędzia pomocne w planowaniu i monitorowaniu przebiegu ciąży.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-10 rounded-[3rem] border border-rose-100 shadow-sm">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">📅 Termin porodu</h3>
+                <div class="space-y-4">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Data pierwszego dnia ostatniej miesiączki:</label>
+                    <input type="date" id="lmp-date" class="calc-input">
+                    <button onclick="app.calculateDueDate()" class="w-full bg-rose-200 text-rose-800 font-bold py-3 rounded-2xl hover:bg-rose-300 smooth-transition">Oblicz termin</button>
+                    <div id="due-date-result" class="mt-6 p-4 rounded-2xl bg-rose-50 text-center hidden">
+                        <p class="text-xs text-rose-500 uppercase tracking-widest">Przewidywany termin:</p>
+                        <p id="result-date" class="text-2xl font-bold text-rose-800 mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-10 rounded-[3rem] border border-lilac-100 shadow-sm">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">⚖️ Przyrost wagi w ciąży</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Waga (kg):</label>
+                            <input type="number" id="start-weight" placeholder="np. 65" class="calc-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Wzrost (cm):</label>
+                            <input type="number" id="height-cm" placeholder="np. 170" class="calc-input">
+                        </div>
+                    </div>
+                    <button onclick="app.calculateWeightGain()" class="w-full bg-lilac-200 text-lilac-800 font-bold py-3 rounded-2xl hover:bg-lilac-300 smooth-transition">Sprawdź normy</button>
+                    <div id="weight-result" class="mt-6 p-4 rounded-2xl bg-lilac-50 hidden text-center">
+                        <p id="bmi-status" class="text-xs font-bold text-lilac-600 uppercase tracking-widest mb-1"></p>
+                        <p id="weight-range" class="text-lg font-bold text-lilac-800"></p>
+                        <p class="text-xs text-lilac-500 mt-2 leading-relaxed">Zalecenia wg Instytutu Medycyny (IOM) dla ciąży pojedynczej.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz -->
+    <section id="view-quiz" class="view-section hidden animate-view">
+        <div class="max-w-3xl mx-auto bg-white p-12 md:p-16 rounded-[4.5rem] border border-rose-100 shadow-sm text-center">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8">Ekspercki Quiz Wiedzy 30+</h2>
+            <div id="quiz-wrapper"></div>
+        </div>
+    </section>
+
+</main>
+
+<div class="fixed bottom-10 right-4 sm:right-10 z-[60]">
+    <button id="ai-toggle" class="bg-lilac-200 text-lilac-800 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all border border-lilac-300 group">
+        <span class="text-2xl group-hover:scale-125 transition-transform">💬</span>
+    </button>
+</div>
+
+<div id="ai-chat" class="fixed bottom-32 right-4 sm:right-10 w-[calc(100vw-2rem)] sm:w-[380px] h-[600px] bg-white rounded-[3.5rem] shadow-2xl flex flex-col z-[60] border border-rose-50 hidden animate-view">
+    <div class="bg-lilac-100/60 text-lilac-800 p-7 rounded-t-[3.5rem] flex justify-between items-center border-b border-lilac-200">
+        <span class="font-bold text-xs tracking-widest uppercase text-lilac-800/80">Asystent Gemini</span>
+        <button id="chat-close" class="text-2xl leading-none hover:text-rose-400 transition-colors">&times;</button>
+    </div>
+    <div id="chat-messages" class="flex-grow overflow-y-auto p-8 space-y-6 text-sm">
+        <div class="bg-rose-50/50 p-6 rounded-[2.5rem] rounded-tl-none border border-rose-100 text-slate-600 leading-relaxed shadow-sm">
+            Witaj. Chętnie porozmawiam o AMH, diecie płodności, cfDNA czy psychologii macierzyństwa 30+.
+        </div>
+    </div>
+    <div class="p-7 border-t border-rose-50 bg-white rounded-b-[3.5rem]">
+        <form id="chat-form" class="flex gap-4">
+            <input type="text" id="chat-input" placeholder="Zadaj pytanie..." class="flex-grow bg-rose-50/20 border border-rose-100 rounded-full px-7 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-lilac-200 outline-none">
+            <button type="submit" class="bg-lilac-200 text-lilac-800 w-12 h-12 rounded-full flex items-center justify-center shadow-sm font-bold">&#10148;</button>
+        </form>
+    </div>
+</div>
+
+<footer class="bg-white border-t border-rose-100 py-16">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <p class="text-xs uppercase tracking-[0.5em] text-slate-500 mb-4 font-bold tracking-widest">Portal Świadome Macierzyństwo</p>
+        <p class="text-xs text-slate-500 font-light italic">&copy; 2026 Portal Edukacyjny. Dane oparte na EBM.</p>
+        <!-- NOWA LINIA: Podpis autorki -->
+        <p class="text-xs text-slate-500 font-medium mt-2">Autorka: Daria Janicka</p>
+    </div>
+</footer>
+
+<script>
+const app = {
+    state: { currentView: 'overview', charts: {}, history: [] },
+    init: function() {
+        this.bindNav();
+        this.bindChat();
+        this.navigate('overview');
+        this.setupQuiz();
+        this.initTodoPersistence();
+    },
+    bindNav: function() {
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.navigate(e.target.getAttribute('data-target')));
+        });
+    },
+    navigate: function(id) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+        const targetView = document.getElementById('view-' + id);
+        if(targetView) targetView.classList.remove('hidden');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            const isQuizBtn = btn.getAttribute('data-target') === 'quiz';
+            if(btn.getAttribute('data-target') === id) {
+                if(isQuizBtn) {
+                    btn.className = 'nav-btn text-lilac-600 font-bold px-8 py-2 rounded-full text-xs md:text-sm smooth-transition border-b-2 border-lilac-600 bg-lilac-50 shadow-inner underline decoration-lilac-600 decoration-2 underline-offset-4';
+                } else {
+                    btn.className = 'nav-btn bg-lilac-100 text-lilac-800 font-semibold px-8 py-2 rounded-full text-xs md:text-sm smooth-transition border border-lilac-200 shadow-sm';
+                }
+            } else {
+                if(isQuizBtn) {
+                    btn.className = 'nav-btn text-lilac-600 font-bold px-5 py-2 rounded-full text-xs md:text-sm smooth-transition border-b-2 border-lilac-600 hover:bg-lilac-50 underline decoration-lilac-600 decoration-2 underline-offset-4';
+                } else {
+                    btn.className = 'nav-btn text-slate-600 hover:bg-rose-50 px-8 py-2 rounded-full text-xs md:text-sm font-medium smooth-transition border border-transparent';
+                }
+            }
+        });
+        if(id === 'preconception' && !this.state.charts.fert) this.initFert();
+        if(id === 'pregnancy' && !this.state.charts.deliv) this.initDeliv();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    initFert: function() {
+        const ctx = document.getElementById('fertilityChart').getContext('2d');
+        this.state.charts.fert = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['20-24 lata', '25-29 lat', '30-34 lata', '35-39 lat'],
+                datasets: [{
+                    label: 'Szansa na poczęcie (%) w ciągu 12 miesięcy',
+                    data: [86, 78, 63, 52],
+                    backgroundColor: ['#FDF2F8', '#FCE7F3', '#EDE9FE', '#DDD6FE'],
+                    borderRadius: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Szansa: ${context.parsed.y}% (w ciągu roku starania)`
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Szansa (%)' }, grid: { color: '#FDF8F9' } }
+                }
+            }
+        });
+    },
+    initDeliv: function() {
+        const ctx = document.getElementById('deliveryChart').getContext('2d');
+        this.state.charts.deliv = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cięcie Cesarskie', 'Poród Naturalny'],
+                datasets: [{ data: [48, 52], backgroundColor: ['#DDD6FE', '#FCE7F3'], borderWidth: 0, hoverOffset: 15 }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                cutout: '80%', 
+                plugins: { 
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed}%`;
+                            }
+                        }
+                    }
+                } 
+            }
+        });
+    },
+    calculateDueDate: function() {
+        const lmp = document.getElementById('lmp-date').value;
+        if (!lmp) return;
+        const date = new Date(lmp);
+        date.setDate(date.getDate() + 280);
+        const result = date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('result-date').innerText = result;
+        document.getElementById('due-date-result').classList.remove('hidden');
+    },
+    calculateWeightGain: function() {
+        const w = parseFloat(document.getElementById('start-weight').value);
+        const h = parseFloat(document.getElementById('height-cm').value) / 100;
+        if (!w || !h) return;
+        const bmi = w / (h * h);
+        let range = "";
+        let status = "";
+        if (bmi < 18.5) { status = "Niedowaga (BMI < 18.5)"; range = "Zalecany przyrost: 12.5 - 18 kg"; }
+        else if (bmi < 25) { status = "Waga prawidłowa (BMI 18.5 - 24.9)"; range = "Zalecany przyrost: 11.5 - 16 kg"; }
+        else if (bmi < 30) { status = "Nadwaga (BMI 25 - 29.9)"; range = "Zalecany przyrost: 7 - 11.5 kg"; }
+        else { status = "Otyłość (BMI > 30)"; range = "Zalecany przyrost: 5 - 9 kg"; }
+        document.getElementById('bmi-status').innerText = status;
+        document.getElementById('weight-range').innerText = range;
+        document.getElementById('weight-result').classList.remove('hidden');
+    },
+    setupQuiz: function() {
+        const qData = [
+            { q: "Który hormon jest kluczem do oceny rezerwy jajnikowej?", o: ["AMH", "Progesteron", "HCG"], a: 0, hint: "AMH odzwierciedla liczbę pęcherzyków gotowych do dojrzewania." },
+            { q: "Na ile miesięcy przed ciążą wdrożyć suplementację folanami?", o: ["Tydzień", "Minimum 3 miesiące", "Dopiero po teście dodatnim"], a: 1, hint: "Daje to organizmowi czas na nasycenie tkanek i ochronę układu nerwowego dziecka." },
+            { q: "Czy badania prenatalne na NFZ są dostępne dla każdej ciężarnej?", o: ["Tylko po 35 roku życia", "Tylko w ciąży bliźniaczej", "Tak, bez względu na wiek"], a: 2, hint: "W Polsce Program Badań Prenatalnych jest obecnie powszechny." },
+            { q: "Czym charakteryzuje się nowoczesny test cfDNA?", o: ["Jest inwazyjny", "Ma czułość >99% dla Trisomii 21", "Bada tylko wagę płodu"], a: 1, hint: "To najdokładniejszy nieinwazyjny test analizujący krew matki." },
+            { q: "Dlaczego dojrzałość emocjonalna 30+ jest nazywana 'kapitałem'?", o: ["Bo daje wyższą rezyliencję i spokój", "Bo dzieci są wtedy mądrzejsze", "Bo szybciej się chudnie po porodzie"], a: 0, hint: "Stabilność psychiczna pozwala na budowanie bezpiecznej i świadomej więzi." },
+            { q: "Która technika najszybciej wycisza lęk okołoporodowy?", o: ["Szybkie picie kawy", "Oddech 4-7-8 i mindfulness", "Przeglądanie czarnych scenariuszy"], a: 1, hint: "Praca z oddechem bezpośrednio wpływa na autonomiczny układ nerwowy." }
+        ];
+        const wrapper = document.getElementById('quiz-wrapper');
+        let sc = 0;
+        const render = (i) => {
+            if(i >= qData.length) {
+                wrapper.innerHTML = `<div class='py-10 text-center'><h4 class='text-2xl mb-8 font-serif'>Twój Wynik: ${sc}/${qData.length}</h4><button onclick='location.reload()' class='bg-lilac-200 text-lilac-800 px-12 py-3 rounded-full font-bold shadow-md hover:scale-105 transition-all'>Zacznij od nowa</button></div>`;
+                return;
+            }
+            const item = qData[i];
+            wrapper.innerHTML = `<p class='text-xs text-slate-500 font-bold mb-4 uppercase tracking-[0.2em]'>Krok ${i+1} z ${qData.length}</p><h4 class='text-lg font-bold mb-8 font-serif leading-relaxed'>${item.q}</h4><div class='grid gap-4'>${item.o.map((o, idx) => `<button class='quiz-option w-full text-left p-6 text-sm font-medium smooth-transition' onclick='app.checkQuiz(${i}, ${idx})'>${o}</button>`).join('')}</div><div id='feedback' class='hidden mt-10 p-8 rounded-[2.5rem] text-xs bg-lilac-50 text-lilac-800 italic leading-relaxed'></div>`;
+        };
+        this.checkQuiz = (qi, oi) => {
+            const fb = document.getElementById('feedback'), btns = document.querySelectorAll('.quiz-option'), ok = qData[qi].a;
+            btns.forEach(b => b.disabled = true);
+            if(oi === ok) { btns[oi].classList.add('correct'); sc++; fb.innerHTML = `<strong>Wspaniale!</strong> ${qData[qi].hint}`; }
+            else { btns[oi].classList.add('incorrect'); btns[ok].classList.add('correct'); fb.innerHTML = `<strong>Prawie...</strong> Prawidłowa odpowiedź: "${qData[qi].o[ok]}". ${qData[qi].hint}`; }
+            fb.classList.remove('hidden');
+            setTimeout(() => render(qi + 1), 3000);
+        };
+        render(0);
+    },
+    initTodoPersistence: function() {
+        const checkboxes = document.querySelectorAll('.todo-item');
+        const storageKey = 'swiadome_macierzynstwo_todos';
+        const savedData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        checkboxes.forEach(cb => {
+            const id = cb.getAttribute('data-id');
+            if (savedData[id]) cb.checked = true;
+            cb.addEventListener('change', () => {
+                const currentData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                currentData[id] = cb.checked;
+                localStorage.setItem(storageKey, JSON.stringify(currentData));
+            });
+        });
+    },
+    bindChat: function() {
+        const toggle = document.getElementById('ai-toggle'), chat = document.getElementById('ai-chat'), close = document.getElementById('chat-close'), form = document.getElementById('chat-form');
+        const toggleScrollLock = (isLocked) => {
+            if (window.innerWidth < 640) {
+                document.body.style.overflow = isLocked ? 'hidden' : '';
+            }
+        };
+        toggle.addEventListener('click', () => {
+            const isOpening = chat.classList.contains('hidden');
+            chat.classList.toggle('hidden');
+            toggleScrollLock(isOpening);
+        });
+        close.addEventListener('click', () => {
+            chat.classList.add('hidden');
+            toggleScrollLock(false);
+        });
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input'), val = input.value.trim();
+            if(!val) return;
+            this.addMsg(val, 'user');
+            input.value = '';
+            const loadingBubbleId = this.showLoading();
+            const reply = await this.askGemini(val);
+            this.hideLoading(loadingBubbleId);
+            this.addMsg(reply, 'model');
+        });
+    },
+    addMsg: function(t, r) {
+        const c = document.getElementById('chat-messages'), d = document.createElement('div');
+        d.className = `flex ${r === 'user' ? 'justify-end' : 'justify-start'}`;
+        d.innerHTML = `<div class="${r === 'user' ? 'bg-lilac-200 text-lilac-900 shadow-sm' : 'bg-rose-50/60 border border-rose-100 text-slate-600'} p-5 rounded-[2.5rem] max-w-[85%] leading-relaxed">${t}</div>`;
+        c.appendChild(d);
+        c.scrollTop = c.scrollHeight;
+        this.state.history.push({ role: r === 'user' ? 'user' : 'model', parts: [{ text: t }] });
+    },
+    showLoading: function() {
+        const c = document.getElementById('chat-messages');
+        const id = 'loading-' + Date.now();
+        const d = document.createElement('div');
+        d.id = id; d.className = 'flex justify-start';
+        d.innerHTML = `<div class="bg-rose-50/60 border border-rose-100 p-4 rounded-[2rem] text-slate-500 text-xs flex items-center space-x-2"><span>Asystent pisze</span><div class="flex space-x-1"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+        c.appendChild(d);
+        c.scrollTop = c.scrollHeight;
+        return id;
+    },
+    hideLoading: function(id) { const el = document.getElementById(id); if (el) el.remove(); },
+    askGemini: async function(q) {
+        const apiKey = "";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = { contents: this.state.history, systemInstruction: { parts: [{ text: "Jesteś asystentem portalu Świadome Macierzyństwo 30+. Odpowiadaj merytorycznie i empatycznie na podstawie wiedzy o AMH, diecie, cfDNA i psychologii dojrzałej." }] } };
+        const fetchWithRetry = async (retries = 5, delay = 1000) => {
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error();
+                const result = await response.json();
+                return result.candidates[0].content.parts[0].text;
+            } catch (e) {
+                if (retries > 0) { await new Promise(r => setTimeout(r, delay)); return fetchWithRetry(retries - 1, delay * 2); }
+                return "Przepraszam, błąd połączenia.";
+            }
+        };
+        return await fetchWithRetry();
+    }
+};
+document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+</body>
+</html>
